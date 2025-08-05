@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .date-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #2563eb;
+        }
+
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        /* Main Content */
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .content-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #2563eb;
+        }
+
+        .summary-card.green { border-left-color: #16a34a; }
+        .summary-card.red { border-left-color: #dc2626; }
+
+        .summary-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .clickable {
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+        .text-green { color: #16a34a; font-weight: 600; }
+        .text-red { color: #dc2626; font-weight: 600; }
+        .text-gray { color: #999; }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .product-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Calendar Grid for Product Modal */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .day-header {
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .calendar-day {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 8px;
+            min-height: 80px;
+            transition: all 0.2s;
+        }
+
+        .calendar-day.has-activity {
+            background: #eff6ff;
+            border-color: #2563eb;
+        }
+
+        .day-number {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .day-info {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .day-received { color: #16a34a; }
+        .day-issued { color: #dc2626; }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Date Navigation */
+        .date-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .current-date {
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📦 Inventory Management System</h1>
+            <div class="header-info">
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('daily')">Daily View</button>
+                    <button class="tab" onclick="showTab('cumulative')">Month-to-Date</button>
+                    <button class="tab" onclick="showTab('products')">Products</button>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        📁 Upload Excel
+                    </button>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileUpload(event)">
+                    <span class="date-info" id="todayDate"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily View Tab -->
+        <div id="daily" class="tab-content active">
+            <div class="content">
+                <div class="content-header">
+                    <h2 class="content-title">Daily Stock Movement</h2>
+                    <div class="date-nav">
+                        <button class="btn btn-secondary" onclick="changeDay(-1)">←</button>
+                        <span class="current-date" id="currentDateDisplay">July 1, 2025</span>
+                        <button class="btn btn-secondary" onclick="changeDay(1)">→</button>
+                    </div>
+                </div>
+
+                <div class="summary-grid">
+                    <div class="summary-card green">
+                        <div class="summary-label">Received Today</div>
+                        <div class="summary-value" id="dailyReceived">0</div>
+                    </div>
+                    <div class="summary-card red">
+                        <div class="summary-label">Issued Today</div>
+                        <div class="summary-value" id="dailyIssued">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Net Change</div>
+                        <div class="summary-value" id="dailyNet">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Opening Stock (30/06)</div>
+                        <div class="summary-value" id="openingStock">0</div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Opening Stock (30/06)</th>
+                            <th>Received</th>
+                            <th>Issued</th>
+                            <th>Current Stock</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dailyTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">Please upload an Excel file to view data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cumulative View Tab -->
+        <div id="cumulative" class="tab-content">
+            <div class="content">
+                <div class="content-header">
+                    <h2 class="content-title">Month-to-Date Summary</h2>
+                </div>
+
+                <div class="summary-grid">
+                    <div class="summary-card green">
+                        <div class="summary-label">Total Received (MTD)</div>
+                        <div class="summary-value" id="mtdReceived">0</div>
+                    </div>
+                    <div class="summary-card red">
+                        <div class="summary-label">Total Issued (MTD)</div>
+                        <div class="summary-value" id="mtdIssued">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Opening Stock (30/06)</div>
+                        <div class="summary-value" id="mtdOpeningStock">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Current Stock</div>
+                        <div class="summary-value" id="totalStock">0</div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Opening Stock</th>
+                            <th>Total Received</th>
+                            <th>Total Issued</th>
+                            <th>Current Stock</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cumulativeTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">Please upload an Excel file to view data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="products" class="tab-content">
+            <div class="content">
+                <div class="content-header">
+                    <h2 class="content-title">All Products</h2>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Current Stock</th>
+                            <th>MTD Received</th>
+                            <th>MTD Issued</th>
+                            <th>Unit</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">Please upload an Excel file to view data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalProductName">Product Details</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="product-info">
+                    <div class="info-item">
+                        <div class="info-label">Current Stock</div>
+                        <div class="info-value" id="modalCurrentStock">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">MTD Received</div>
+                        <div class="info-value text-green" id="modalReceived">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">MTD Issued</div>
+                        <div class="info-value text-red" id="modalIssued">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Unit</div>
+                        <div class="info-value" id="modalUnit">-</div>
+                    </div>
+                </div>
+
+            <h3 style="margin-bottom: 15px;">Monthly Movement Calendar</h3>
+                <div class="calendar-grid" id="modalCalendarGrid">
+                    <!-- Product calendar will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Global variables
+        let stockData = [];
+        let receivedData = [];
+        let issuedData = [];
+        let processedData = {};
+        let currentDay = 1;
+        let currentMonth = 'Month';
+        let currentYear = new Date().getFullYear();
+        let daysInMonth = 31;
+        let previousMonthDate = '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTodayDate();
+            document.getElementById('currentDateDisplay').textContent = `Day ${currentDay}`;
+        });
+
+        // Update today's date
+        function updateTodayDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('todayDate').textContent = `Today: ${today.toLocaleDateString('en-US', options)}`;
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab button
+            event.target.classList.add('active');
+        }
+
+        // File upload handler
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    processWorkbook(workbook);
+                    alert('Excel file loaded successfully!');
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error processing file. Please check the file format.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Process workbook
+        function processWorkbook(workbook) {
+            // Reset data
+            stockData = [];
+            receivedData = [];
+            issuedData = [];
+            processedData = {};
+
+            // Try to detect month and year from sheet data
+            detectMonthAndYear(workbook);
+
+            // Process each sheet
+            processSheet(workbook, 'STOCK', stockData, 'stock');
+            processSheet(workbook, 'RECEIVED', receivedData, 'received');
+            processSheet(workbook, 'ISSUE', issuedData, 'issued');
+
+            console.log('Stock Data:', stockData);
+            console.log('Received Data:', receivedData);
+            console.log('Issued Data:', issuedData);
+
+            // Process all data
+            processAllData();
+            
+            // Update all views
+            updateDailyView();
+            updateCumulativeView();
+            updateProductsTable();
+        }
+
+        // Detect month and year from sheet data
+        function detectMonthAndYear(workbook) {
+            // Try to detect from STOCK sheet first
+            if (workbook.Sheets['STOCK']) {
+                const sheet = workbook.Sheets['STOCK'];
+                const data = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: '', raw: false});
+                
+                // Look for headers that might contain month info
+                for (let i = 0; i < Math.min(10, data.length); i++) {
+                    const row = data[i];
+                    if (row) {
+                        for (let j = 0; j < row.length; j++) {
+                            const cell = String(row[j] || '').toUpperCase();
+                            
+                            // Check for month patterns like "TOTAL RECEIVED IN MONTH JULY"
+                            const monthMatch = cell.match(/MONTH\s+(\w+)/);
+                            if (monthMatch) {
+                                currentMonth = monthMatch[1].charAt(0).toUpperCase() + monthMatch[1].slice(1).toLowerCase();
+                                console.log(`Detected month: ${currentMonth}`);
+                            }
+                            
+                            // Check for "STOCK ON" date patterns like "STOCK ON 31/07/25" or "30/06/2025"
+                            if (cell.includes('STOCK ON') && cell.match(/\d{1,2}\/\d{1,2}\/\d{2,4}/)) {
+                                const dateMatch = cell.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+                                if (dateMatch) {
+                                    const day = parseInt(dateMatch[1]);
+                                    const month = parseInt(dateMatch[2]);
+                                    const year = parseInt(dateMatch[3]);
+                                    
+                                    // Convert 2-digit year to 4-digit
+                                    const fullYear = year < 100 ? 2000 + year : year;
+                                    
+                                    // This is the previous month's last date
+                                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                                      'July', 'August', 'September', 'October', 'November', 'December'];
+                                    
+                                    // Current month is the next month
+                                    const currentMonthIndex = month % 12; // month is 0-based for next month
+                                    currentMonth = monthNames[currentMonthIndex];
+                                    currentYear = month === 12 ? fullYear + 1 : fullYear;
+                                    
+                                    // Store previous month date exactly as it appears
+                                    previousMonthDate = `${day}/${month < 10 ? '0' + month : month}/${year}`;
+                                    
+                                    // Calculate days in current month
+                                    daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+                                    
+                                    console.log(`Detected opening stock date: ${previousMonthDate}`);
+                                    console.log(`Current month: ${currentMonth} ${currentYear}, Days: ${daysInMonth}`);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Update UI elements with detected month/year
+            updateMonthDisplay();
+        }
+
+        // Update month display in UI
+        function updateMonthDisplay() {
+            // Update all references to month/year in the UI
+            const dateDisplay = document.getElementById('currentDateDisplay');
+            if (dateDisplay) {
+                dateDisplay.textContent = `${currentMonth} ${currentDay}, ${currentYear}`;
+            }
+            
+            // Update opening stock label
+            const openingStockLabels = document.querySelectorAll('.summary-label');
+            openingStockLabels.forEach(label => {
+                if (label.textContent.includes('Opening Stock')) {
+                    label.textContent = `Opening Stock (${previousMonthDate})`;
+                }
+            });
+            
+            // Update table headers
+            const tableHeaders = document.querySelectorAll('th');
+            tableHeaders.forEach(header => {
+                if (header.textContent.includes('Opening Stock')) {
+                    header.textContent = `Opening Stock (${previousMonthDate})`;
+                }
+            });
+            
+            // Update modal calendar title
+            const modalTitle = document.querySelector('.modal-body h3');
+            if (modalTitle) {
+                modalTitle.textContent = `${currentMonth} ${currentYear} - Monthly Movement`;
+            }
+        }
+
+        // Process individual sheet
+        function processSheet(workbook, sheetName, targetArray, type) {
+            if (!workbook.Sheets[sheetName]) {
+                console.log(`Sheet ${sheetName} not found`);
+                return;
+            }
+            
+            const sheet = workbook.Sheets[sheetName];
+            const data = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: '', raw: false});
+            
+            console.log(`Processing ${sheetName} sheet, total rows: ${data.length}`);
+            
+            // Find header row by looking for "PART SIZE" text
+            let headerRowIndex = -1;
+            for (let i = 0; i < Math.min(10, data.length); i++) {
+                const row = data[i];
+                if (row && row.some(cell => cell && String(cell).toUpperCase().includes('PART SIZE'))) {
+                    headerRowIndex = i;
+                    console.log(`Found header row at index ${i}`);
+                    break;
+                }
+            }
+            
+            if (headerRowIndex < 0) {
+                console.log(`Could not find header row in ${sheetName}`);
+                return;
+            }
+            
+            // Data starts after header row (skip date row if exists)
+            let dataStartRow = headerRowIndex + 1;
+            
+            // Check if next row is date row
+            if (data[dataStartRow] && data[dataStartRow].some(cell => {
+                const num = parseInt(cell);
+                return num >= 1 && num <= 31;
+            })) {
+                dataStartRow++;
+                console.log(`Skipping date row, data starts at row ${dataStartRow}`);
+            }
+            
+            // Process data rows with category tracking
+            let currentPartName = ''; // Track current part name category
+            let processedCount = 0;
+            
+            for (let i = dataStartRow; i < data.length; i++) {
+                const row = data[i];
+                if (!row) continue;
+                
+                // Check if this is a category row (has value in column A but no unit in column C)
+                if (row[0] && (!row[2] || row[2] === '')) {
+                    currentPartName = String(row[0]).trim();
+                    console.log(`Found category: "${currentPartName}" at row ${i}`);
+                    continue; // Skip to next row
+                }
+                
+                // Get values from columns
+                const partSize = row[1] || '';  // Column B - PART SIZE
+                const unit = row[2] || '';      // Column C - UNIT
+                
+                // Skip if no part size or unit
+                if (!partSize || !unit) {
+                    continue;
+                }
+                
+                // Create display name: Current Part Name + Part Size
+                const displayName = currentPartName 
+                    ? `${currentPartName} ${String(partSize).trim()}`
+                    : String(partSize).trim();
+                
+                console.log(`Row ${i}: Category="${currentPartName}" + PartSize="${partSize}" = "${displayName}"`);
+                
+                const item = {
+                    name: displayName,
+                    unit: String(unit).trim()
+                };
+                
+                if (type === 'stock') {
+                    // STOCK sheet columns:
+                    item.currentStock = parseFloat(row[3]) || 0;    // Column D - TODAY STOCK
+                    item.previousStock = parseFloat(row[4]) || 0;   // Column E - STOCK ON date
+                    item.dailyStock = {};
+                    
+                    // Daily values start from column F (index 5)
+                    for (let day = 1; day <= 31; day++) {
+                        const colIndex = 5 + day;
+                        if (row[colIndex] !== undefined && row[colIndex] !== '') {
+                            item.dailyStock[day] = parseFloat(row[colIndex]) || 0;
+                        }
+                    }
+                } else {
+                    // RECEIVED/ISSUE sheet columns:
+                    item.total = parseFloat(row[3]) || 0;  // Column D - TOTAL
+                    const dailyKey = type === 'received' ? 'dailyReceived' : 'dailyIssued';
+                    item[dailyKey] = {};
+                    
+                    // Daily values start from column F (index 5)
+                    for (let day = 1; day <= 31; day++) {
+                        const colIndex = 5 + day;
+                        const value = parseFloat(row[colIndex]) || 0;
+                        if (value > 0) {
+                            item[dailyKey][day] = value;
+                        }
+                    }
+                }
+                
+                targetArray.push(item);
+                processedCount++;
+            }
+            
+            console.log(`Processed ${processedCount} items from ${sheetName}`);
+            
+            // Log first few items to verify
+            if (targetArray.length > 0) {
+                console.log('Sample processed items:');
+                targetArray.slice(0, 5).forEach((item, idx) => {
+                    console.log(`  ${idx + 1}. "${item.name}" (${item.unit})`);
+                });
+            }
+        }
+
+        // Process all data
+        function processAllData() {
+            // Get all unique products
+            const allProducts = new Set();
+            stockData.forEach(item => allProducts.add(item.name));
+            receivedData.forEach(item => allProducts.add(item.name));
+            issuedData.forEach(item => allProducts.add(item.name));
+
+            console.log(`Total unique products: ${allProducts.size}`);
+
+            // Process each product
+            allProducts.forEach(productName => {
+                const stock = stockData.find(s => s.name === productName);
+                const received = receivedData.find(r => r.name === productName);
+                const issued = issuedData.find(i => i.name === productName);
+
+                processedData[productName] = {
+                    unit: stock?.unit || received?.unit || issued?.unit || '',
+                    initialStock: stock?.previousStock || 0,  // Stock on 30/06
+                    currentStock: stock?.currentStock || 0,   // Today's stock
+                    daily: {},
+                    monthlyReceived: received?.total || 0,    // Take directly from sheet
+                    monthlyIssued: issued?.total || 0         // Take directly from sheet
+                };
+
+                // Store daily data directly from sheets without calculations
+                for (let day = 1; day <= 31; day++) {
+                    processedData[productName].daily[day] = {
+                        received: received?.dailyReceived?.[day] || 0,
+                        issued: issued?.dailyIssued?.[day] || 0,
+                        stock: stock?.dailyStock?.[day] || 0
+                    };
+                }
+            });
+        }
+
+        // Change day
+        function changeDay(direction) {
+            currentDay += direction;
+            if (currentDay < 1) currentDay = daysInMonth;
+            if (currentDay > daysInMonth) currentDay = 1;
+            document.getElementById('currentDateDisplay').textContent = `${currentMonth} ${currentDay}, ${currentYear}`;
+            updateDailyView();
+        }
+
+        // Update daily view - Show ALL products
+        function updateDailyView() {
+            let totalReceived = 0;
+            let totalIssued = 0;
+            let totalOpeningStock = 0;
+            
+            const tbody = document.getElementById('dailyTableBody');
+            tbody.innerHTML = '';
+
+            // Show ALL products, sorted by name
+            const sortedProducts = Object.entries(processedData).sort((a, b) => a[0].localeCompare(b[0]));
+
+            sortedProducts.forEach(([productName, data]) => {
+                const dayData = data.daily[currentDay] || {};
+                const received = dayData.received || 0;
+                const issued = dayData.issued || 0;
+                const stock = dayData.stock || 0;
+
+                totalReceived += received;
+                totalIssued += issued;
+                totalOpeningStock += data.initialStock;
+
+                tbody.innerHTML += `
+                    <tr onclick="showProductModal('${productName.replace(/'/g, "\\'")}')">
+                        <td class="clickable">${productName}</td>
+                        <td>${data.initialStock}</td>
+                        <td class="${received > 0 ? 'text-green' : 'text-gray'}">${received || '-'}</td>
+                        <td class="${issued > 0 ? 'text-red' : 'text-gray'}">${issued || '-'}</td>
+                        <td>${stock}</td>
+                        <td>${data.unit}</td>
+                    </tr>
+                `;
+            });
+
+            if (tbody.innerHTML === '') {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No products found</td></tr>';
+            }
+
+            // Update summary
+            document.getElementById('dailyReceived').textContent = totalReceived;
+            document.getElementById('dailyIssued').textContent = totalIssued;
+            document.getElementById('dailyNet').textContent = totalReceived - totalIssued;
+            document.getElementById('openingStock').textContent = totalOpeningStock;
+        }
+
+        // Update cumulative view
+        function updateCumulativeView() {
+            let totalReceived = 0;
+            let totalIssued = 0;
+            let totalStock = 0;
+            let totalOpeningStock = 0;
+            
+            const tbody = document.getElementById('cumulativeTableBody');
+            tbody.innerHTML = '';
+
+            const sortedProducts = Object.entries(processedData).sort((a, b) => a[0].localeCompare(b[0]));
+
+            sortedProducts.forEach(([productName, data]) => {
+                totalReceived += data.monthlyReceived;
+                totalIssued += data.monthlyIssued;
+                totalStock += data.currentStock;
+                totalOpeningStock += data.initialStock;
+
+                tbody.innerHTML += `
+                    <tr onclick="showProductModal('${productName.replace(/'/g, "\\'")}')">
+                        <td class="clickable">${productName}</td>
+                        <td>${data.initialStock}</td>
+                        <td class="${data.monthlyReceived > 0 ? 'text-green' : 'text-gray'}">${data.monthlyReceived || '-'}</td>
+                        <td class="${data.monthlyIssued > 0 ? 'text-red' : 'text-gray'}">${data.monthlyIssued || '-'}</td>
+                        <td>${data.currentStock}</td>
+                        <td>${data.unit}</td>
+                    </tr>
+                `;
+            });
+
+            if (tbody.innerHTML === '') {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No data available</td></tr>';
+            }
+
+            // Update summary
+            document.getElementById('mtdReceived').textContent = totalReceived;
+            document.getElementById('mtdIssued').textContent = totalIssued;
+            document.getElementById('totalStock').textContent = totalStock;
+            document.getElementById('mtdOpeningStock').textContent = totalOpeningStock;
+        }
+
+        // Update products table
+        function updateProductsTable() {
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = '';
+
+            const sortedProducts = Object.entries(processedData).sort((a, b) => a[0].localeCompare(b[0]));
+
+            sortedProducts.forEach(([productName, data]) => {
+                let status = 'Normal';
+                let statusClass = '';
+                
+                if (data.currentStock === 0) {
+                    status = 'Out of Stock';
+                    statusClass = 'text-red';
+                } else if (data.currentStock < 50) {
+                    status = 'Low Stock';
+                    statusClass = 'text-red';
+                }
+
+                tbody.innerHTML += `
+                    <tr onclick="showProductModal('${productName.replace(/'/g, "\\'")}')">
+                        <td class="clickable">${productName}</td>
+                        <td>${data.currentStock}</td>
+                        <td class="${data.monthlyReceived > 0 ? 'text-green' : 'text-gray'}">${data.monthlyReceived || '-'}</td>
+                        <td class="${data.monthlyIssued > 0 ? 'text-red' : 'text-gray'}">${data.monthlyIssued || '-'}</td>
+                        <td>${data.unit}</td>
+                        <td class="${statusClass}">${status}</td>
+                    </tr>
+                `;
+            });
+
+            if (tbody.innerHTML === '') {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No products found</td></tr>';
+            }
+        }
+
+        // Show product modal with calendar
+        function showProductModal(productName) {
+            const data = processedData[productName];
+            if (!data) return;
+
+            document.getElementById('modalProductName').textContent = productName;
+            document.getElementById('modalCurrentStock').textContent = data.currentStock;
+            document.getElementById('modalReceived').textContent = data.monthlyReceived;
+            document.getElementById('modalIssued').textContent = data.monthlyIssued;
+            document.getElementById('modalUnit').textContent = data.unit;
+
+            // Generate product calendar
+            const calendarGrid = document.getElementById('modalCalendarGrid');
+            calendarGrid.innerHTML = '';
+
+            // Add headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'day-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+
+            // Calculate first day of month
+            const firstDay = new Date(currentYear, getMonthIndex(currentMonth), 1).getDay();
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                calendarGrid.appendChild(document.createElement('div'));
+            }
+
+            // Add days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayData = data.daily[day];
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+
+                const received = dayData?.received || 0;
+                const issued = dayData?.issued || 0;
+
+                if (received > 0 || issued > 0) {
+                    dayElement.classList.add('has-activity');
+                }
+
+                let content = `<div class="day-number">${day}</div>`;
+                if (received > 0 || issued > 0) {
+                    content += '<div class="day-info">';
+                    if (received > 0) {
+                        content += `<div class="day-received">In: ${received}</div>`;
+                    }
+                    if (issued > 0) {
+                        content += `<div class="day-issued">Out: ${issued}</div>`;
+                    }
+                    content += '</div>';
+                }
+
+                dayElement.innerHTML = content;
+                calendarGrid.appendChild(dayElement);
+            }
+
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        // Helper function to get month index
+        function getMonthIndex(monthName) {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+            return months.findIndex(m => m.toLowerCase() === monthName.toLowerCase());
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
